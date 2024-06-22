@@ -6,12 +6,22 @@ const Button = ({clickHandler,text}) => {
   )
 }
 
-const Anecdote = ({anecdotes,votes,index}) => {
+const Anecdote = ({anecdote,votes}) => {
   return (
     <div>
-      {anecdotes[index]}<br/>
-      has {votes[index]} votes
+      {anecdote}<br/>
+      has {votes} votes
     </div>
+  )
+}
+
+const Section = ({title,anecdotes,votes,index}) => {
+  //console.log(anecdotes[index])
+  return(
+    <>
+      <h1>{title}</h1>
+      <Anecdote anecdote={anecdotes[index]} votes={votes[index]} />
+    </>
   )
 }
 
@@ -42,16 +52,28 @@ const App = () => {
   const voteClick = () => {
     const copy = [...votes]
     copy[selected] += 1
-    console.log(copy)
+    //console.log(copy)
     setVotes(copy)
   } 
 
+  const mostVotedIndex = (votes) => {
+    let max = 0
+    let mostVoted = 0
+    for (let i = 0; i < votes.length; i++) {
+      if (votes[i] > max) {
+        max = votes[i]
+        mostVoted = i
+      }
+    }
+    return mostVoted
+  }
 
   return (
     <div>
-      <Anecdote anecdotes={anecdotes} votes={votes} index={selected} />
+      <Section title={'Anecdote of the day'} anecdotes={anecdotes} votes={votes} index={selected} />
       <Button clickHandler={voteClick} text='vote' />
       <Button clickHandler={nextAnecdoteClick} text='next anecdote' />
+      <Section title={'Anecdote with most votes'} anecdotes={anecdotes} votes={votes} index={mostVotedIndex(votes)} />
     </div>
   )
 }
