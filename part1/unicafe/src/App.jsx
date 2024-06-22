@@ -16,20 +16,25 @@ const Statistics = (props) => {
   }
   
   return (
-    <>
-      <StatisticLine text={props[0].text} value={props[0].value}/><br/>
-      <StatisticLine text={props[1].text} value={props[1].value}/><br/>
-      <StatisticLine text={props[2].text} value={props[2].value}/><br/>
-      <StatisticLine text={props[3].text} value={props[3].value}/><br/>
-      <StatisticLine text={props[4].text} value={props[4].value}/><br/>
-      <StatisticLine text={props[5].text} value={props[5].value}/><br/>
-    </>
+    <table>
+      <tbody>
+        <StatisticLine text={props[0].text} value={props[0].value}/>
+        <StatisticLine text={props[1].text} value={props[1].value}/>
+        <StatisticLine text={props[2].text} value={props[2].value}/>
+        <StatisticLine text={props[3].text} value={props[3].value}/>
+        <StatisticLine text={props[4].text} value={props[4].value}/>
+        <StatisticLine text={props[5].text} value={props[5].value}/>
+        </tbody>
+    </table>
   )
 }
 // StatisticLLine component
 const StatisticLine = ({text,value}) => {
   return (
-    <>{text} {value}</>
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+    </tr>
   )
 }
 // App component
