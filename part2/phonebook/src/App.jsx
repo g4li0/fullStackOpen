@@ -16,43 +16,42 @@ const App = () => {
     personService.getAll().then(responsePersons => {
       setPersons(responsePersons);
     })
-  },[]);
+  }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
-    if(newName === '' || newNumber === ''){
+    if (newName === '' || newNumber === '') {
       return;
     }
-    if(persons.find(person => person.name === newName)){
+    if (persons.find(person => person.name === newName)) {
       alert(`a person named "${newName}" is already added to phonebook`);
       return;
     }
-    if(persons.find(person => person.number === newNumber)){
+    if (persons.find(person => person.number === newNumber)) {
       alert(`a person with phone number "${newNumber}" is already added to phonebook`);
       return;
     }
 
     const newPersonObject = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1
+      number: newNumber
     }
     personService.create(newPersonObject).then(responsePerson => {
       setPersons(persons.concat(responsePerson));
       setNewName('');
       setNewNumber('');
-    
+
     })
   }
 
   const handleNameChange = (event) => {
-    if(event.target.value === ''){
+    if (event.target.value === '') {
       return;
     }
     setNewName(event.target.value);
   }
   const handleNumberChange = (event) => {
-    if(event.target.value === ''){
+    if (event.target.value === '') {
       return;
     }
     setNewNumber(event.target.value);
@@ -62,16 +61,26 @@ const App = () => {
     setFilter(event.target.value);
   }
 
+  const deletePerson = (id) => {
+    if (window.confirm(`Delete ${persons.find(person => person.id === id).name}?`)) {
+      personService
+        .remove(id)
+        .then(response => {
+          setPersons(persons.filter(person => person.id !== id));
+        })
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
       <Filter filterChangeHandler={handleFilterChange} />
-      
+
       <h3>add a new</h3>
       <PersonForm submitAction={addPerson} nameChangeHandler={handleNameChange} numberChangeHandler={handleNumberChange} />
 
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} deleteClick={deletePerson} />
     </div>
   );
 }
