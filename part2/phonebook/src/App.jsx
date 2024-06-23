@@ -17,6 +17,13 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault();
+    if(newName === ''){
+      return;
+    }
+    if(persons.find(person => person.name === newName)){
+      alert(`${newName} is already added to phonebook`);
+      return;
+    }
     const nameObject = {
       name: newName
     }
@@ -25,6 +32,9 @@ const App = () => {
   }
 
   const handleNameChange = (event) => {
+    if(event.target.value === ''){
+      return;
+    }
     setNewName(event.target.value);
   }
 
@@ -42,8 +52,8 @@ const App = () => {
       </form>
       <h2>Numbers</h2>
       {/* <div>debug: {newName}</div> */}
-      {persons.map((person,i) =>
-        <Person key={i} person={person} />
+      {persons.map(person =>
+        <Person key={person.name} person={person} />
       )}
     </div>
   )
