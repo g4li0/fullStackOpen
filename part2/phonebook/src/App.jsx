@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+//import axios from 'axios';
 
 import Persons from './components/Persons';
 import PersonForm from './components/PersonForm';
@@ -23,9 +23,16 @@ const App = () => {
     if (newName === '' || newNumber === '') {
       return;
     }
-    if (persons.find(person => person.name === newName)) {
-      alert(`a person named "${newName}" is already added to phonebook`);
-      return;
+    const ocurrence = persons.find(person => person.name === newName);
+    if (ocurrence !== undefined) {
+      if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
+        personService.update(ocurrence.id, {...ocurrence, number: newNumber}).then(responsePerson => {
+          setPersons(persons.map(person => person.id !== responsePerson.id ? person : responsePerson));
+          setNewName('');
+          setNewNumber('');
+        })
+      }
+        return;
     }
     if (persons.find(person => person.number === newNumber)) {
       alert(`a person with phone number "${newNumber}" is already added to phonebook`);
