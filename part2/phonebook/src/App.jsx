@@ -86,11 +86,21 @@ const App = () => {
   }
 
   const deletePerson = (id) => {
-    if (window.confirm(`Delete ${persons.find(person => person.id === id).name}?`)) {
+    const personToDelete = persons.find(person => person.id === id).name;
+    if (window.confirm(`Delete ${personToDelete}?`)) {
       personService
         .remove(id)
         .then(response => {
           setPersons(persons.filter(person => person.id !== id));
+        })
+        .catch(error => {
+          setNotificationMessage({
+            message: `Information of ${personToDelete} has already been removed from server`,
+            type: 'error'
+          });
+          notificationTimeOut();
+          setPersons(persons.filter(person => person.id !== id));
+        
         })
     }
   }
