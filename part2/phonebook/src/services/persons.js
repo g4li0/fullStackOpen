@@ -12,7 +12,6 @@ const create = newObject => {
 }
 
 const remove = id =>{
-    console.log('id', id);
     const request = axios.delete(`${baseUrl}/${id}`);
     return request.then(response => response.data);
 }
