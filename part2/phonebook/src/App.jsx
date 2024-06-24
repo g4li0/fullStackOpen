@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Persons from './components/Persons';
 import PersonForm from './components/PersonForm';
 import Filter from './components/Filter';
+import Notification from './components/Notification';
 import personService from './services/persons';
 
 const App = () => {
@@ -11,12 +12,19 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState({message:null,type:null});
 
   useEffect(() => {
     personService.getAll().then(responsePersons => {
       setPersons(responsePersons);
     })
   }, []);
+
+  const notificationTimeOut = () => {
+    setTimeout(() => {
+      setNotificationMessage({message:null,type:null});
+    }, 5000)
+  }
 
   const addPerson = (event) => {
     event.preventDefault();
@@ -28,14 +36,21 @@ const App = () => {
       if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
         personService.update(ocurrence.id, {...ocurrence, number: newNumber}).then(responsePerson => {
           setPersons(persons.map(person => person.id !== responsePerson.id ? person : responsePerson));
-          setNewName('');
-          setNewNumber('');
+          setNotificationMessage({
+            message: `Updated ${responsePerson.name}'s number`,
+            type: 'success'
+          });
+          notificationTimeOut();
         })
       }
         return;
     }
     if (persons.find(person => person.number === newNumber)) {
-      alert(`a person with phone number "${newNumber}" is already added to phonebook`);
+      setNotificationMessage({
+        message: `a person with phone number "${newNumber}" is already added to phonebook`,
+        type: 'error'
+      });
+      notificationTimeOut();
       return;
     }
 
@@ -45,9 +60,11 @@ const App = () => {
     }
     personService.create(newPersonObject).then(responsePerson => {
       setPersons(persons.concat(responsePerson));
-      setNewName('');
-      setNewNumber('');
-
+      setNotificationMessage({
+        message: `Added ${responsePerson.name}`,
+        type: 'success'
+      });
+      notificationTimeOut();
     })
   }
 
@@ -80,6 +97,7 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notificationMessage.message} type={notificationMessage.type} />
       <h2>Phonebook</h2>
       <Filter filterChangeHandler={handleFilterChange} />
 
