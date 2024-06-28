@@ -15,7 +15,7 @@ const Country = ({country}) => {
     )
 }
 
-const Countries = ({countries,filter}) => {
+const Countries = ({countries,filter,select}) => {
     const results = filter==='' ? countries : countries.filter(country => country.name.common.toLowerCase().includes(filter.toLowerCase()));
     if(results.length > 10){
         return <div>Too many matches, specify another filter</div>
@@ -29,7 +29,7 @@ const Countries = ({countries,filter}) => {
     
     return (
         results.map((country,i) => 
-            <div key={i}>{country.name.common}<br/></div>
+            <div key={i}>{country.name.common}<button onClick={()=>select(country.name.common)}>show</button><br/></div>
         )
     )
 }

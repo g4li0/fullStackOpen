@@ -34,11 +34,13 @@ const App = () => {
   const handleSearchCountryName = (event) => {
     setSearch(event.target.value);
   }
-  
+  const select = (countryName) => {
+    setSearch(countryName);
+  }
   return (
     <>
       <Find text="find countries" changeHandler={handleSearchCountryName} />
-      <Countries countries={allCountries} filter={search} />
+      <Countries countries={allCountries} filter={search} select={select}/>
     </>
   );
 }
