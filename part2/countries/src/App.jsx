@@ -26,9 +26,6 @@ const App = () => {
     })
   }, []);
 
-  
-  const countryNames = allCountries.map(country => country.name.common);
-  //console.log(countryNames[1]);
 
   // handlers and functions
   const handleSearchCountryName = (event) => {

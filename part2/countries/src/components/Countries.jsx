@@ -1,4 +1,19 @@
+import getWeather from '../services/getWeather';
+import { useState,useEffect } from 'react';
+
 const Country = ({country}) => {
+    const [weather,setWeather] = useState(null);
+    const [icon,setIcon] = useState('');
+    
+    useEffect(() => {
+    getWeather(country.latlng[0],country.latlng[1],'metric')
+    .then(response => {
+        //console.log(response)
+        //console.log(response.main.temp)
+        setWeather(response)
+        //console.log(`https://openweathermap.org/img/wn/${response.weather[0].icon}@2x.png`)
+        setIcon(`https://openweathermap.org/img/wn/${response.weather[0].icon}@2x.png`)
+    })},[])
     return (
         <div>
             <h1>{country.name.common}</h1>
@@ -11,6 +26,10 @@ const Country = ({country}) => {
                 {Object.values(country.languages).map(value => <li key={value}>{value}</li>)}
             </ul>
             <img src={country.flags.png}></img>
+            <h2>Wheather in {country.name.common}</h2>
+            <p>{weather?`temperature ${weather.main.temp} Celcius`:''}</p>
+            <img src={icon ? icon : ''}></img>
+            <p>{weather?`wind ${weather.wind.speed} m/s`:''}</p>
         </div>
     )
 }
@@ -29,7 +48,9 @@ const Countries = ({countries,filter,select}) => {
     
     return (
         results.map((country,i) => 
-            <div key={i}>{country.name.common}<button onClick={()=>select(country.name.common)}>show</button><br/></div>
+            <div key={i}>
+                {country.name.common}<button onClick={()=>select(country.name.common)}>show</button><br/>
+            </div>
         )
     )
 }
