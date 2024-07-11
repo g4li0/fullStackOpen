@@ -40,6 +40,18 @@ app.get('/api/persons/:id', (request, response) =>{
     
 })
 
+app.delete('/api/persons/:id', (request, response) =>{
+    const id = request.params.id
+    const count = persons.length
+    persons = persons.filter(person => person.id !== id)
+    if(persons.length < count){
+        response.status(204).end()
+    }else{
+        response.status(404).end();
+    }
+    
+})
+
 app.get('/info', (request, response) => {
     response.send(`
         <p>Phonebook has info for ${persons.length} people</p>
