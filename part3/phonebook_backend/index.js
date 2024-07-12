@@ -1,27 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
-const mongoose = require('mongoose')
-
-const password = process.argv[2]
-const url = `mongodb+srv://g4li0:${password}@cluster0.ershusm.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`
-mongoose.set('strictQuery', false)
-mongoose.connect(url)
-
-const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
-})
-
-personSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString()
-        delete returnedObject._id
-        delete returnedObject.__v
-    }
-})
-
-const Person = mongoose.model('Person', personSchema)
+const Person = require('./models/person')
 
 const app = express()
 
@@ -29,12 +9,12 @@ app.use(express.json())
 //app.use(morgan('tiny'))
 app.use(morgan(function (tokens, req, res) {
     return [
-      tokens.method(req, res),
-      tokens.url(req, res),
-      tokens.status(req, res),
-      tokens.res(req, res, 'content-length'), '-',
-      tokens['response-time'](req, res), 'ms',
-      tokens.method(req, res) === 'POST' ? JSON.stringify(req.body) : ''
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res), 'ms',
+        tokens.method(req, res) === 'POST' ? JSON.stringify(req.body) : ''
     ].join(' ')
 }))
 
@@ -72,15 +52,17 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
+    /* const id = request.params.id
     const person = persons.find(person => person.id === id)
     if (person) {
         response.json(person)
     }
     else {
         response.status(404).end()
-    }
-
+    } */
+    Person.findById(request.params.id).then(person => {
+        response.json(person)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -103,15 +85,23 @@ app.post('/api/persons', (request, response) => {
             error: 'name or number missing'
         })
     }
-    else if (persons.find(person => person.name === name)) {
+   /*  else if (persons.find(person => person.name === name)) {
         return response.status(400).json({
             error: 'name must be unique'
         })
-    }
+    } */
     else {
-        const newPerson = { id: Math.floor(Math.random() * 999999999).toString(), name, number }
+        /* const newPerson = { id: Math.floor(Math.random() * 999999999).toString(), name, number }
         persons = persons.concat(newPerson)
-        response.status(201).json(newPerson)
+        response.status(201).json(newPerson) */
+        const person = new Person({
+            name,
+            number
+        })
+
+        person.save().then(savedPerson => {
+            response.status(201).json(savedPerson)
+        })
     }
 
 })
