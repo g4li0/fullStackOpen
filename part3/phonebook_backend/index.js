@@ -1,6 +1,27 @@
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose')
+
+const password = process.argv[2]
+const url = `mongodb+srv://g4li0:${password}@cluster0.ershusm.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`
+mongoose.set('strictQuery', false)
+mongoose.connect(url)
+
+const personSchema = new mongoose.Schema({
+    name: String,
+    number: String
+})
+
+personSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject._id
+        delete returnedObject.__v
+    }
+})
+
+const Person = mongoose.model('Person', personSchema)
 
 const app = express()
 
@@ -45,7 +66,9 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(person => {
+        response.json(person)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
