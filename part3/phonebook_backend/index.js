@@ -29,7 +29,7 @@ const errorHandler = (error, request, response, next) => {
     next(error)
 }
 
-const unknownEndpoint = (request, response) => {
+ const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
 }
 
@@ -115,13 +115,46 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
+});
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const { name, number } = request.body
+    const person = {
+        name: name,
+        number: number
+    }
+
+    if(!name || !number) {
+        return response.status(400).json({
+            error: 'name or number missing'
+        })
+    }
+
+    Person.findByIdAndUpdate(request.params.id, person, {new: true})  
+    .then(updatedPerson => {
+        if(updatedPerson) {
+            response.json(updatedPerson)
+        }
+        else{
+            response.status(404).end()
+        }
+        
+    })
+    .catch(error => {
+        next(error)
+    })
 })
 
 app.get('/info', (request, response) => {
-    response.send(`
-        <p>Phonebook has info for ${persons.length} people</p>
-        <p>${new Date()}</p>
-        `)
+
+    Person.find({}).then(person => {
+        response.send(`
+            <p>Phonebook has info for ${person.length} people</p>
+            <p>${new Date()}</p>
+            `)
+    })
+
+    
 })
 
 
