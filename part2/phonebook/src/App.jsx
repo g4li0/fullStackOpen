@@ -66,6 +66,13 @@ const App = () => {
       });
       notificationTimeOut();
     })
+    .catch(error => {
+      setNotificationMessage({
+        message: error.response.data.error,
+        type: 'error'
+      });
+      notificationTimeOut();
+    })
   }
 
   const handleNameChange = (event) => {
