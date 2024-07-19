@@ -42,6 +42,13 @@ const App = () => {
           });
           notificationTimeOut();
         })
+        .catch(error => {
+          setNotificationMessage({
+            message: error.response.data.error,
+            type: 'error'
+          });
+          notificationTimeOut();
+        })
       }
         return;
     }
@@ -63,6 +70,13 @@ const App = () => {
       setNotificationMessage({
         message: `Added ${responsePerson.name}`,
         type: 'success'
+      });
+      notificationTimeOut();
+    })
+    .catch(error => {
+      setNotificationMessage({
+        message: error.response.data.error,
+        type: 'error'
       });
       notificationTimeOut();
     })
