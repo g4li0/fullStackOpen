@@ -14,8 +14,25 @@ const favoriteBlog = (blogs) => {
     return sorted[0]
 }
 
+const mostBlogs = (blogs) => {
+    if(blogs.length<1)
+        return {}
+    const authors = []
+    for(let blog of blogs) {
+        const author = authors.find(a => a.author === blog.author)
+        if(author){
+            author.blogs++
+        } else {
+            authors.push({author: blog.author, blogs: 1})
+        }
+    
+    }
+    return authors.reduce((a,b) => a.blogs > b.blogs ? a : b)
+}
+
 module.exports = {
     dummy,
     totalLikes,
-    favoriteBlog
+    favoriteBlog,
+    mostBlogs
 }
