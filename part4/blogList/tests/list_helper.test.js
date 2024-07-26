@@ -108,3 +108,15 @@ describe('most blogs', () => {
         assert.deepStrictEqual(listHelper.mostBlogs(biggerBlogList), { author: 'Robert C. Martin', blogs: 3 })
     })
 })
+
+describe('most likes', () => {
+    test('when list is empty', () => {
+        assert.deepStrictEqual(listHelper.mostLikes([]), {})
+    })
+    test('when list has only one blog', () => {
+        assert.deepStrictEqual(listHelper.mostLikes(listWithOneBlog), { author: 'Edsger W. Dijkstra', likes: 5 })
+    })
+    test('of a bigger list', () => {
+        assert.deepStrictEqual(listHelper.mostLikes(biggerBlogList), { author: 'Edsger W. Dijkstra', likes: 17 })
+    })
+})
