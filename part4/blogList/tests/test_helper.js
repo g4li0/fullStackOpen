@@ -60,9 +60,21 @@ const blogList = [
     }
 ]
 
-
+const userList = [
+    {
+        username: "root",
+        name: "root",
+        password: "toor"
+    },
+    {
+        username: "test",
+        name: "test",
+        password: "test"
+    }
+]
 
 module.exports = {
     listWithOneBlog,
-    blogList
+    blogList,
+    userList
 }
