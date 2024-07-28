@@ -9,11 +9,11 @@ const app = require('../app')
 const Blog = require('../models/blog')
 beforeEach(async () => {
     await Blog.deleteMany({})
-  
+
     const blogObjects = helper.blogList.map(blog => new Blog(blog))
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
-  })
+})
 
 
 test('dummy returns one', () => {
@@ -32,7 +32,7 @@ describe('total likes', () => {
     })
     test('when list has only one blog equals the likes of that', () => {
         const result = listHelper.totalLikes(helper.listWithOneBlog)
-        assert.strictEqual(result , 5)
+        assert.strictEqual(result, 5)
     })
     test('of a bigger list is calculated right', () => {
         assert.strictEqual(listHelper.totalLikes(helper.blogList), 36)
@@ -77,17 +77,28 @@ describe('most likes', () => {
 
 const api = supertest(app)
 
-describe('', () => {
-    test('get innitial blogs', async () => {
-        await api
-        .get('/api/blogs')
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
-
-        const response = await api.get('/api/blogs')
+describe('GET /api/blogs', () => {
+    test('blogs: get correct Content-Type and length', async () => {
+        const response = await api
+            .get('/api/blogs')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
         assert.strictEqual(response.body.length, helper.blogList.length)
 
     })
+
+    test('blogs: get correct data params', async () => {
+        const response = await api
+            .get('/api/blogs')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        const allHaveId = response.body.every(blog => blog.id !== undefined)
+        assert.strictEqual(allHaveId, true)
+
+    })
+
+
     after(async () => {
         await mongoose.connection.close()
     })
