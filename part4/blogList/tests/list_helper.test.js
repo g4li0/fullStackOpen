@@ -125,6 +125,19 @@ describe('GET & POST /api/blogs', () => {
         assert.strictEqual(found.likes, newBLog.likes)
     })
 
+    test('POST blogs: likes default to 0 if not provided', async () => {
+        const response = await api
+            .post('/api/blogs')
+            .send({
+                title: 'test',
+                author: 'test',
+                url: 'test'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+        assert.strictEqual(response.body.likes, 0)
+    })
+
     after(async () => {
         await mongoose.connection.close()
     })
