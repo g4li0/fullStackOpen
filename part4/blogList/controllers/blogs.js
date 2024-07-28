@@ -19,7 +19,7 @@ blogsRouter.post('/', async (request, response) => {
         response.status(201).json(result)
     }
     catch (exception) {
-        response.status(400).send('error: ', exception).end()
+        response.status(400).send(`error ${exception}`).end()
     }
 })
 
