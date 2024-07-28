@@ -138,6 +138,25 @@ describe('GET & POST /api/blogs', () => {
         assert.strictEqual(response.body.likes, 0)
     })
 
+    test('POST blogs: title and url are required', async () => {
+        await api
+            .post('/api/blogs')
+            .send({})
+            .expect(400)
+        await api
+            .post('/api/blogs')
+            .send({ title: 'test' })
+            .expect(400)
+        await api
+            .post('/api/blogs')
+            .send({ url: 'test' })
+            .expect(400)
+        await api
+            .post('/api/blogs')
+            .send({ title: 'test', url: 'test' })
+            .expect(201)
+    })
+
     after(async () => {
         await mongoose.connection.close()
     })
