@@ -6,19 +6,29 @@ const helper = require('./test_helper')
 const app = require('../app')
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
+
+const root = {
+    username: 'root',
+    password: 'toor'
+}
 
 describe('test /api/blogs with method', () => {
     beforeEach(async () => {
         await Blog.deleteMany({})
-
-        const blogObjects = helper.blogList.map(blog => new Blog(blog))
+        await User.deleteMany({})
+        const createdUser = await api.post('/api/users').send(root)
+        const blogObjects = helper.blogList.map(blog => new Blog({...blog, user: createdUser.body.id}))
         const promiseArray = blogObjects.map(blog => blog.save())
         await Promise.all(promiseArray)
     })
 
     test('GET blogs: correct Content-Type and length', async () => {
+        
+        
+        
         const response = await api
             .get('/api/blogs')
             .expect(200)
@@ -47,9 +57,10 @@ describe('test /api/blogs with method', () => {
 
     test('POST blogs: increases blogs by one and new content stored correctly', async () => {
         const oldBlogs = helper.blogList
-
+        const auth = await api.post('/api/login').send(root)
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send(newBLog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -66,8 +77,10 @@ describe('test /api/blogs with method', () => {
     })
 
     test('POST blogs: likes default to 0 if not provided', async () => {
+        const auth = await api.post('/api/login').send(root)
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send({
                 title: 'test',
                 author: 'test',
@@ -79,20 +92,25 @@ describe('test /api/blogs with method', () => {
     })
 
     test('POST blogs: title and url are required', async () => {
+        const auth = await api.post('/api/login').send(root)
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send({})
             .expect(400)
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send({ title: 'test' })
             .expect(400)
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send({ url: 'test' })
             .expect(400)
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .send({ title: 'test', url: 'test' })
             .expect(201)
     })
@@ -100,9 +118,10 @@ describe('test /api/blogs with method', () => {
     test('DELETE blogs: correct status code and length', async () => {
         const blogs = await api.get('/api/blogs')
         const id = blogs.body[0].id
-
+        const auth = await api.post('/api/login').send(root)
         await api
             .delete(`/api/blogs/${id}`)
+            .set('Authorization', `Bearer ${auth.body.token}`)
             .expect(204)
 
         const newBlogs = await api.get('/api/blogs')
