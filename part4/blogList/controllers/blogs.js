@@ -1,6 +1,4 @@
-const process = require('process')
 const blogsRouter = require('express').Router()
-const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
@@ -14,40 +12,36 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
 
-    try {
-        const body = request.body
+    const body = request.body
 
-        const decodedToken = jwt.verify(request.token, process.env.SECRET)
-        if(!decodedToken.id) {
-            return response.status(401).json({ error: 'token missing or invalid' })
-        }
-        const user = await User.findById(decodedToken.id)
-        //const user = await User.findById(body.userId)
-        const blog = new Blog({
-            title: body.title,
-            author: body.author,
-            url: body.url,
-            likes: body.likes,
-            user: user._id
-        })
-        
-        const savedBlog = await blog.save()
-        user.blogs = user.blogs.concat(savedBlog._id)
-        await user.save()
-        response.status(201).json(savedBlog)
+    const user = await User.findById(request.user.id)
+
+    if(!user) {
+        return response.status(401).json({ error: 'token missing or invalid' })
     }
-    catch (exception) {
-        response.status(400).json({ error: exception.message })
-    }
+
+    const blog = new Blog({
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes,
+        user: user._id
+    })
+
+    const savedBlog = await blog.save()
+    user.blogs = user.blogs.concat(savedBlog._id)
+    await user.save()
+    response.status(201).json(savedBlog)
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
 
     const blog = await Blog.findById(request.params.id)
+    if (!blog) {
+        return response.status(404).json({ error: `not found blog with id ${request.params.id}` })
+    }
 
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-    if (!decodedToken.id || decodedToken.id.toString() !== blog.user.toString()) {
+    if (!request.user.id || request.user.id.toString() !== blog.user.toString()) {
         return response.status(401).json({ error: 'token missing or invalid' })
     }
     await Blog.findByIdAndDelete(request.params.id)
