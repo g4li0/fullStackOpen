@@ -1,6 +1,10 @@
+// hooks
 import { useState, useEffect } from 'react'
+// components
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+// services
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -186,8 +190,9 @@ const App = () => {
           {user.name} logged in
           <input type="button" value="logout" onClick={logOut} />
         </p>
-
-        {blogForm()}
+        <Togglable buttonLabel="new blog">
+          {blogForm()}
+        </Togglable>
 
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
