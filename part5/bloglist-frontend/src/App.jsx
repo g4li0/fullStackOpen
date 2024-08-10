@@ -132,6 +132,27 @@ const App = () => {
     }
   }
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await blogService.remove(id)
+      console.log(response)
+      setBlogs(blogs.filter(blog => blog.id !== id))
+      setNotification({
+        message: 'blog deleted',
+        type: 'success'
+      })
+      NotificationTimeOut()
+
+    }
+    catch (exception) {
+      setNotification({
+        message: `error deleting blog: ${exception.response.data.error}`,
+        type: 'error'
+      })
+      NotificationTimeOut()
+    }
+  }
+
   const logOut = () => {
     setUser(null)
     window.localStorage.removeItem('loggedBlogappUser')
@@ -158,11 +179,11 @@ const App = () => {
           <input type="button" value="logout" onClick={logOut} />
         </p>
         <Togglable buttonLabel="new blog">
-          <BlogForm createBlog={addBlog}/>
+          <BlogForm createBlog={addBlog} />
         </Togglable>
 
-        {blogs.sort((a,b) => b.likes-a.likes ).map(blog =>
-          <Blog key={blog.id} blog={blog} updateBlog={handleLike} />
+        {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+          <Blog key={blog.id} blog={blog} updateBlog={handleLike} deleteBlog={handleDelete} />
         )}
       </div>
     )
