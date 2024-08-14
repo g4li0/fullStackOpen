@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useState } from 'react'
 
-const Blog = ({ blog ,updateBlog, deleteBlog }) => {
+const Blog = ({ blog ,updateBlog ,deleteBlog }) => {
 
   const [visible, setVisible] = useState(false)
 
@@ -11,9 +11,9 @@ const Blog = ({ blog ,updateBlog, deleteBlog }) => {
     borderWidth: 1,
     marginBottom: 5
   }
-  
+
   const visibility = { display: visible ? '' : 'none' }
-  
+
   const updateLikes = () => {
     const newBlog = {
       user: blog.user.id,

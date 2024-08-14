@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
+import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 // services
 import blogService from './services/blogs'
@@ -14,7 +15,7 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [notification, setNotification] = useState({ message: null, type: null });
+  const [notification, setNotification] = useState({ message: null, type: null })
 
 
   useEffect(() => {
@@ -35,11 +36,10 @@ const App = () => {
     setTimeout(() => {
       setNotification({ message: null, type: null })
     }
-      , 4000)
+    , 4000)
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const handleLogin = async ({ username, password }) => {
     try {
       const user = await loginService.login({
         username: username,
@@ -59,43 +59,13 @@ const App = () => {
       })
       NotificationTimeOut()
     } catch (exception) {
-      //console.log(exception)
+      console.log(exception)
       setNotification({
         message: 'wrong credentials',
         type: 'error'
       })
       NotificationTimeOut()
     }
-  }
-
-  const loginForm = () => {
-    return (
-      <div>
-        <h2>log in to application</h2>
-        <Notification message={notification.message} type={notification.type} />
-        <form onSubmit={handleLogin} >
-          <div>
-            username
-            <input
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-            <input
-              type="password"
-              value={password}
-              name="Password"
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
-    )
   }
 
   const addBlog = async (newBlog) => {
@@ -163,31 +133,38 @@ const App = () => {
     NotificationTimeOut()
   }
 
-  if (user === null) {
-    return (
-      loginForm()
-    )
-  }
-  else {
-    return (
+  const title = (user) => user
+    ? 'blogs'
+    : 'log in to application'
 
-      <div>
-        <h2>blogs</h2>
-        <Notification message={notification.message} type={notification.type} />
-        <p>
-          {user.name} logged in
-          <input type="button" value="logout" onClick={logOut} />
-        </p>
-        <Togglable buttonLabel="new blog">
-          <BlogForm createBlog={addBlog} />
-        </Togglable>
 
-        {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} updateBlog={handleLike} deleteBlog={handleDelete} />
-        )}
-      </div>
-    )
-  }
+  return (
+    <div>
+      <h2>{title(user)}</h2>
+      <Notification message={notification.message} type={notification.type} />
+      {
+        (!user &&
+          <LoginForm handleLogin={handleLogin} />
+        )
+        ||
+        (user &&
+          <>
+            <p>
+              {user ? user.name : null} logged in
+              <input type="button" value="logout" onClick={logOut} />
+            </p>
+            <Togglable buttonLabel="new blog">
+              <BlogForm createBlog={addBlog} />
+            </Togglable>
+
+            {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+              <Blog key={blog.id} blog={blog} updateBlog={handleLike} deleteBlog={handleDelete} />
+            )}
+          </>
+        )
+      }
+    </div>
+  )
 
 }
 
