@@ -1,5 +1,5 @@
 // hooks
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 // components
 import Blog from './components/Blog'
 import Notification from './components/Notification'
@@ -70,6 +70,7 @@ const App = () => {
 
   const addBlog = async (newBlog) => {
     try {
+      blogFormRef.current.toggleVisibility()
       const response = await blogService.create(newBlog)
       setBlogs(blogs.concat(response))
       setNotification({
@@ -137,6 +138,7 @@ const App = () => {
     ? 'blogs'
     : 'log in to application'
 
+  const blogFormRef = useRef()
 
   return (
     <div>
@@ -153,7 +155,7 @@ const App = () => {
               {user ? user.name : null} logged in
               <input type="button" value="logout" onClick={logOut} />
             </p>
-            <Togglable buttonLabel="new blog">
+            <Togglable buttonLabel="new blog" ref={blogFormRef}>
               <BlogForm createBlog={addBlog} />
             </Togglable>
 

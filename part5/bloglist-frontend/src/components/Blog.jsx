@@ -34,7 +34,7 @@ const Blog = ({ blog ,updateBlog ,deleteBlog }) => {
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author} <button onClick={() => setVisible(!visible)}>{visible ? 'hide' : 'view'}</button>
-      <div style={visibility}>
+      <div style={visibility} className='hiddenInfo'>
         {blog.url} <br />
         {blog.likes} <button onClick={updateLikes}>like</button> <br />
         {blog.user.name} <br />
