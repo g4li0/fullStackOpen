@@ -36,10 +36,13 @@ const App = () => {
     setTimeout(() => {
       setNotification({ message: null, type: null })
     }
-    , 4000)
+    , 5000)
   }
 
   const handleLogin = async ({ username, password }) => {
+    if(username === '' || password === '') {
+      return
+    }
     try {
       const user = await loginService.login({
         username: username,
