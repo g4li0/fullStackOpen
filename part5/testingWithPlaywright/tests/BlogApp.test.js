@@ -1,5 +1,6 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
 const { post } = require('../../../part4/blogList/app')
+const { setMaxIdleHTTPParsers } = require('http')
 
 describe('Blog app', () => {
   const baseUrl = 'http://localhost:5173'
@@ -99,6 +100,20 @@ describe('Blog app', () => {
       await expect(likeButton).toBeVisible()
       await likeButton.click()
       await expect(page.locator('.hiddenInfo')).not.toContainText(likes+1)
+    })
+    test('a blog can be deleted', async ({ page }) => {
+      await page.getByText('new blog').click()
+      await page.getByTestId('title').fill('title')
+      await page.getByTestId('author').fill('author')
+      await page.getByTestId('url').fill('url')
+      await page.locator('form').locator('input[type="submit"]').click()
+      await page.getByText('view').click()
+      const info = await page.locator('.hiddenInfo')
+      const removeButton = await info.getByText('remove')
+      await expect(removeButton).toBeVisible()
+      page.on('dialog', dialog => dialog.accept())
+      await removeButton.click()
+      await expect(page.locator('.success')).toContainText('blog deleted')
     })
   })
 
