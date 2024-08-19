@@ -28,3 +28,10 @@ dist-ssr
 ReactIntroduction/
 part2eg/
 test/
+_-_-_*
+
+# playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

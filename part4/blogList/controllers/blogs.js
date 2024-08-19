@@ -29,7 +29,7 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
         user: user._id
     })
 
-    const savedBlog = await blog.save()
+    const savedBlog = await (await blog.save()).populate('user', { username: 1, name: 1 })
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
     response.status(201).json(savedBlog)
@@ -49,15 +49,20 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
     response.status(204).end()
 })
 
-blogsRouter.put('/:id', async (request, response) => {
-
-    const blog = {
-        title: request.body.title,
-        author: request.body.author,
-        url: request.body.url,
-        likes: request.body.likes
+blogsRouter.put('/:id',userExtractor, async (request, response) => {
+    const body = request.body
+    const user = await User.findById(request.user.id)
+    if(!user) {
+        return response.status(401).json({ error: 'token missing or invalid' })
     }
-    const result = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
+    const blog = {
+        user: body.user,
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes
+    }
+    const result = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true }).populate('user', { username: 1, name: 1 })
     response.json(result)
 })
 
