@@ -1,4 +1,6 @@
+
 const process = require('process')
+
 const config = require('./utils/config')
 const express = require('express')
 require('express-async-errors')
@@ -34,10 +36,11 @@ app.use(middleware.tokenExtractor)
 
 app.use('/api/users', usersRouter)
 app.use('/api/blogs', blogsRouter)
+
 if (process.env.NODE_ENV === 'test') {
     const testingRouter = require('./controllers/testing')
     app.use('/api/testing', testingRouter)
-}
+
 
 
 
