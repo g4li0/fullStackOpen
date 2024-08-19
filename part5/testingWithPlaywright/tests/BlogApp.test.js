@@ -7,11 +7,33 @@ describe('Blog app', () => {
     await page.getByTestId('password').fill(password)
     await page.getByText('login').click()
   }
-  const defaultBlog = async (page) => {
-    await page.getByText('new blog').click()
-    await page.getByTestId('title').fill('title')
-    await page.getByTestId('author').fill('author')
-    await page.getByTestId('url').fill('url')
+  const postBlog = async ( request, credentials , blog) => {
+    const response = await request.post(`${baseUrl}/api/login`, {
+      data: {
+        username: credentials.username,
+        password: credentials.password
+      }
+    })
+    const token = (await response.json()).token
+
+    await request.post(`${baseUrl}/api/blogs`, {
+      data: {
+        title: blog.title,
+        author: blog.author,
+        url: blog.url,
+        likes: blog.likes? blog.likes : 0,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    )
+  }
+  const addBlog = async (page, title, author, url) => {
+    await page.locator('button').getByText('new blog').click()
+    await page.getByTestId('title').fill(title)
+    await page.getByTestId('author').fill(author)
+    await page.getByTestId('url').fill(url)
     await page.locator('form').locator('input[type="submit"]').click()
   }
   beforeEach(async ({ page, request }) => {
@@ -30,25 +52,13 @@ describe('Blog app', () => {
         password: 'root'
       }
     })
-    await request.post(`${baseUrl}/api/login`, {
-      data: {
-        username: 'root',
-        password: 'toor'
-      }
-    })
-    await request.post(`${baseUrl}/api/login`, {
-      data: {
-        username: 'toor',
-        password: 'root'
-      }
-    })
 
     await page.goto(baseUrl)
   })
 
   test('Login form is shown', async ({ page }) => {
     const content = await page.locator('h2').all()
-    const form = await page.locator('#loginForm')
+    const form = page.locator('#loginForm')
     await expect(content).toHaveLength(1)
     await expect(content[0]).toHaveText('log in to application')
     await expect(form).toBeVisible()
@@ -59,19 +69,15 @@ describe('Blog app', () => {
   describe('Login', () => {
 
     test('succeeds with correct credentials', async ({ page }) => {
-      await page.getByTestId('username').fill('root')
-      await page.getByTestId('password').fill('toor')
-      await page.getByText('login').click()
+      await login(page, 'root', 'toor')
       const notification = await page.locator('.success')
       await expect(notification).toBeVisible()
       await expect(notification).toContainText('you are logged in')
 
     })
     test('fails with wrong credentials', async ({ page }) => {
-      await page.getByTestId('username').fill('root')
-      await page.getByTestId('password').fill('root')
-      await page.getByText('login').click()
-      const notification = await page.locator('.error')
+      await login(page, 'root', 'root')
+      const notification = page.locator('.error')
       await expect(notification).toBeVisible()
       await expect(notification).toContainText('wrong credentials')
 
@@ -84,43 +90,50 @@ describe('Blog app', () => {
     })
 
     test('a new blog can be created', async ({ page }) => {
-      await defaultBlog(page)
+      await addBlog(page, 'title', 'author', 'url')
       await expect(page.locator('.success')).toContainText('a new blog title by author added')
       await expect(page.getByText('title author')).toBeVisible()
     })
 
-    test('a blog can be liked', async ({ page }) => {
-      await defaultBlog(page)
+    test('a blog can be liked', async ({ page, request }) => {
+      //await addBlog(page, 'title', 'author', 'url')
+      await postBlog(request, { username: 'root', password: 'toor' }, { title: 'title', author: 'author', url: 'url' })
+      page.reload()
       await page.getByText('view').click()
-      const likeButton = await page.getByText('like')
+      const likeButton = page.getByText('like')
       const data = await page.locator('.hiddenInfo').textContent()
-      const likes = await data.split(' ')[1]
+      const likes = parseInt(data.split(' ')[1])
       await expect(likeButton).toBeVisible()
       await likeButton.click()
-      await expect(page.locator('.hiddenInfo')).not.toContainText(likes + 1)
+      await expect(page.locator('.hiddenInfo')).toContainText((likes+1).toString())
     })
-    test('a blog can be deleted', async ({ page }) => {
-      await defaultBlog(page)
+    test('a blog can be deleted', async ({ page, request }) => {
+      await postBlog(request, { username: 'root', password: 'toor' }, { title: 'title', author: 'author', url: 'url' })
+      page.reload()
       await page.getByText('view').click()
-      const info = await page.locator('.hiddenInfo')
-      const removeButton = await info.getByText('remove')
+      const blogDetails = page.locator('.hiddenInfo')
+      const removeButton = blogDetails.getByText('remove')
       await expect(removeButton).toBeVisible()
       page.on('dialog', dialog => dialog.accept())
       await removeButton.click()
       await expect(page.locator('.success')).toContainText('blog deleted')
     })
-    test('a blog cannot be deleted by another user', async ({ page }) => {
-      await defaultBlog(page)
-      await expect(page.locator('.success')).toContainText('a new blog title by author added')
-      await page.getByText('logout').click()
-      await expect(page.locator('.success')).toContainText('you are logged out')
-      await login(page, 'toor', 'root')
-      await expect(page.getByText('view')).toBeVisible()
-      await page.getByText('view').click()
-      const info = await page.locator('.hiddenInfo')
-      const removeButton = await info.getByText('remove')
-      await expect(removeButton).toBeHidden()
+    test('a blog cannot be deleted by another user', async ({ page, request }) => {
+      await postBlog(request, { username: 'toor', password: 'root' }, { title: 'title', author: 'author', url: 'url' })
+      await page.reload()
+      await page.locator('button').getByText('view').click()
+      const removeButton = page.locator('button').getByText('remove')
+      await expect(removeButton).not.toBeVisible()
     })
+    test('blogs are ordered by likes', async ({ page, request }) => {
+      await postBlog(request, { username: 'root', password: 'toor' }, { title: 'title1', author: 'author1', url: 'url1', likes: 1 })
+      await postBlog(request, { username: 'root', password: 'toor' }, { title: 'title2', author: 'author2', url: 'url2', likes: 2 })
+      await postBlog(request, { username: 'root', password: 'toor' }, { title: 'title3', author: 'author3', url: 'url3', likes: 3 })
+      page.reload()
+      await expect(page.locator('.hiddenInfo').first()).toContainText('3')
+      await expect(page.locator('.hiddenInfo').last()).toContainText('1')
+    })
+
   })
 
 })
